@@ -1,0 +1,80 @@
+---
+title: "Principal Component Analysis"
+author: "Shantam Gupta"
+date: "April 8, 2017"
+output: html_document
+---
+
+```{r}
+require(devtools)
+require(ggbiplot)
+```
+#Reading the data
+```{r}
+final <- read.csv("final.csv")
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+```
+
+Befor PCA Analysis we shall standardize our columns 
+
+```{r}
+pca_final <- final[,]
+for(i in 5:8){
+  mean <- mean(pca_final[,i])
+  range <- max(pca_final[,i]) - min(pca_final[,i])
+  for(j in 1 :288){
+    pca_final[j,i] <- ((pca_final[j,i]- mean)/ range)
+  }
+}
+```
+
+#PCA Analysis
+```{r}
+pca <- prcomp(pca_final[,5:308],center = TRUE,scale. = TRUE) 
+summary(pca)
+```
+#plotting the PCA
+
+```{r}
+plot(pca, type = "l")
+```
+
+```{r}
+barplot( pca$sdev^2/sum(pca$sdev^2) , xlab="principle component", 
+         ylab="% of variance")
+barplot( cumsum( pca$sdev^2/sum(pca$sdev^2) ) , xlab="principle component", 
+         ylab="cumulative % of variance" )
+```
+
+```{r}
+# define a color for each sample 
+myColor <- rep(NA, nrow(pca_final))
+myColor[pca_final[,4]==1] <- "red" 
+myColor[pca_final[,4]==0] <- "blue" 
+
+# score plot
+plot(pca$x[,1:2], col=myColor, pch=16, cex=2)
+legend("topleft", pch=16, col=c("red", "blue"), c("Rating =1", "Rating =0"))
+pca$x
+     
+```
+
+The above plot helps to understand how many components to retain. The y- axis is the variance and x axis are the principal componets. 
+
+
+
+#Biplots
+```{r}
+ ggbiplot(pca, obs.scale = 1, var.scale = 1, 
+              groups = factor(pca_final$Rating), ellipse = TRUE, 
+              circle = TRUE) +  scale_color_discrete(name = '') + theme(legend.direction = 'horizontal', 
+              legend.position = 'top')
+
+
+```
+
+
+
+#Conclusion
+Not enough separation in the first two dimensions(8.9 % for PC1 and 5.9 % for PC2). Because of low proportion of variance in each component of PCA it becomes difficult to use PCA for dimensionality reduction for further analysis in our project.

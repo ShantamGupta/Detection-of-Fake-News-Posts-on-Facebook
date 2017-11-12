@@ -1,0 +1,102 @@
+---
+title: "logistic Regression"
+author: "Shantam Gupta"
+date: "April 8, 2017"
+output: html_document
+---
+```{r}
+require(datasets)
+require(corrplot)
+library(corrplot)
+library(ROCR)
+library(MASS)
+library(gmodels)
+library(glmpath)
+library(pamr)
+```
+#Reading the data
+```{r}
+final <- read.csv("final.csv")
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+```
+
+#Model 1 
+##Fitting logistic model using all predictors. 
+```{r}
+fit.train1 <- glm( Rating~ ., family=binomial(link="logit"), data=train[3:307])
+summary(fit.train1)
+```
+
+The logit model with all predictors failed to converge and hence we we shall try to build the model using a subset of predictors
+#Model 2 
+##Fitting logistic model using Debate, share count, reaction count, comment count
+```{r}
+fit.train2 <- glm( Rating ~ Debate + share_count + reaction_count + comment_count,   family=binomial(link="logit"), data=train[3:307])
+summary(fit.train2)
+```
+##Prediction on Model 2 
+```{r}
+# calculate predicted probabilities on the same training set using model 2
+scores <- predict(fit.train2, newdata=test[4:7], type="response")
+
+
+# prediction on the training set using model 2
+c <- table(true= test[,3], predict=scores > 0.5)
+
+ #prediction accuracy of our model 2 is 85.05%
+ sum(diag(prop.table(c)))
+
+
+# compare predicted probabilities to labels, for varying probability cutoffs
+pred <- prediction(scores, labels= test$Rating )
+perf <- performance(pred, "tpr", "fpr")
+
+# plot the ROC curve
+log_test <- plot(perf, colorize=T, main="logistic regression using  predictors for test data ROC curve")
+
+
+#  the area under the ROC curve  for model 1 is 0.92033
+log_test_auc <- unlist(attributes(performance(pred, "auc"))$y.values)
+log_test_auc 
+```
+
+
+The reason for this behavior is because share count, reaction count and comment count are highly correlated to each other. Thus share count has low p-value indicating that its coefficient is quite significant.
+
+#Model 3 
+##Using only share count as the predictor ( because of low p-value in model 2)
+```{r}
+fit.train3 <- glm( Rating~ share_count ,  family=binomial(link="logit"), data=train[3:307])
+summary(fit.train3)
+```
+##Prediction on Model 3
+```{r}
+# calculate predicted probabilities on the same training set using model 3
+scores <- predict(fit.train3, newdata=test[4:7], type="response")
+
+
+# prediction on the training set using model 3
+c <- table(true= test[,3], predict=scores > 0.5)
+
+ #prediction accuracy of our model 3 is 80.45%
+ sum(diag(prop.table(c)))
+
+
+# compare predicted probabilities to labels, for varying probability cutoffs
+pred <- prediction(scores, labels= test$Rating )
+perf <- performance(pred, "tpr", "fpr")
+
+# plot the ROC curve
+log_test <- plot(perf, colorize=T, main="logistic regression using  predictors for test data ROC curve")
+
+
+#  the area under the ROC curve  for model 3 is 0.8983
+log_test_auc <- unlist(attributes(performance(pred, "auc"))$y.values)
+log_test_auc
+```
+
+#Inference
+It is quite evident that model 2 outperforms other models in test data prediction accuracy despite having a sliightly higher AIC value than model 3.
+
+However the model 3  doesn't take into account any of the vectors that we had generated. logistic models have failed to converge for a large no of vectors.

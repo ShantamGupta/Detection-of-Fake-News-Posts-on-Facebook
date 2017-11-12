@@ -1,0 +1,39 @@
+---
+title: "kmeans"
+author: "Shantam Gupta"
+date: "April 6, 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+require(datasets)
+```
+
+#Reading the data
+```{r}
+final <- read.csv("final.csv")
+```
+
+#Model 1 
+##Using all predictors we shall try to find clusters in our dataset using kmeans.
+```{r, cache=T}
+set.seed(10)
+kmn <- kmeans(final[, 4:307], centers=2)
+kmn
+```
+
+#Prediction accuracy 
+```{r}
+k <- table(kmn$cluster, final$Rating)
+k 
+```
+
+```{r}
+ sum(diag(prop.table(k)))
+```
+prediction accuracy of our model is 68.75% 
+
+
+#Inference
+We are unable to find any clusters that have a clear separable boundary using kmeans. 

@@ -1,0 +1,47 @@
+---
+title: "Statistical Exploration of dataset"
+author: "Shantam Gupta"
+date: "April 7, 2017"
+output:
+  html_document: default
+---
+
+#Dimensions of the dataset: final
+```{r}
+dim(final)
+```
+
+#Loooking at the structure and one variable summary of the dataset
+```{r}
+str(final)
+summary(final)
+```
+
+```{r}
+#converting  predictors to numeric vectors and response to factors
+final$Debate <-as.numeric(final$Debate)
+final$share_count <- as.numeric(final$share_count)
+final$reaction_count <- as.numeric(final$reaction_count)
+final$comment_count <- as.numeric(final$comment_count)
+```
+
+#Splitting the Dataset into train and test 
+```{r}
+set.seed(100)
+#splitting the dataset into 50% train and  50 % test data
+train <- final[sample(x=1:nrow(final), size=nrow(final)*.7),]
+test <- final[!(rownames(final) %in% rownames(train)),]
+```
+
+#Loooking at the pairwise correlation between predictors
+```{r}
+c<-cor(train[,5:308])
+#since it is difficult to visualilze the correlation matrix  we shall convert it to a dataframe and filter out highly correlated values
+cor_coef <- as.data.frame(c)
+for (i in 1 : 300 ){
+  for ( j in 1 : 300){
+    if (cor_coef[i,j] > 0.65 & (i!= j))
+      cat(sprintf("\n %s  has a strong correlation of %f with %s \n", names(cor_coef)[i],cor_coef[i,j], names(cor_coef)[j]) ) 
+  }
+}
+````
