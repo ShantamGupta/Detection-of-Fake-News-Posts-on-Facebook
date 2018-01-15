@@ -15,7 +15,7 @@ require(stringr)
 df <- read.csv("https://raw.githubusercontent.com/BuzzFeedNews/2016-10-facebook-fact-check/master/data/facebook-fact-check.csv")
 names(df)
 
-token <- "EAACEdEose0cBAJwDGZCeOdhvBeZCZB64xZBWUQFToxqkMJvwsEXDULShoR9d6WdZBza7nur3tFaGVG6SdJMeT0XITqXOHjb59bmueZBLbXYqrQtEaqxf8XM6BST948lANLddSVAxcZBXWZAZCgv5BQDXvs2IRYD7VrrZAWDR1tIhi5EYFtcq1WI4rrmjKoesLOlgoZD"
+token <- "***************************************************"
 
 me <- getUsers("me", token=token)
 ```
